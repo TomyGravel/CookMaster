@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recettes de Cuisine</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+    <header class="bg-dark text-white text-center p-3">
+        <h1>Recettes de Cuisine</h1>
+    </header>
+    <main class="container mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <section id="recipe-list">
+                    <h2>Liste des Recettes</h2>
+                    <!-- Les recettes seront affichées ici -->
+                </section>
+            </div>
+            <div class="col-md-4">
+                <section id="add-recipe" class="mt-4">
+                    <h2>Ajouter une Nouvelle Recette</h2>
+                    <form id="recipe-form">
+                        <div class="form-group">
+                            <label for="recipe-name">Nom de la Recette :</label>
+                            <input type="text" class="form-control" id="recipe-name" name="recipe-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="recipe-ingredients">Ingrédients :</label>
+                            <textarea class="form-control" id="recipe-ingredients" name="recipe-ingredients" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="recipe-steps">Étapes :</label>
+                            <textarea class="form-control" id="recipe-steps" name="recipe-steps" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="recipe-nutrition">Informations Nutritionnelles (protéines, glucides, lipides par 100g) :</label>
+                            <textarea class="form-control" id="recipe-nutrition" name="recipe-nutrition" placeholder="Ex: 10, 20, 5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-dark mt-2">Ajouter la Recette</button>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </main>
+    <footer class="bg-dark text-white text-center p-3 mt-4">
+        <p>&copy; 2024 Recettes de Cuisine</p>
+    </footer>
+
+    <!-- Modal pour afficher les détails de la recette -->
+    <div class="modal fade" id="recipeModal" tabindex="-1" aria-labelledby="recipeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="recipeModalLabel">Détails de la Recette</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h3 id="modal-recipe-name"></h3>
+                    <p><strong>Ingrédients:</strong> <span id="modal-recipe-ingredients"></span></p>
+                    <p><strong>Étapes:</strong> <span id="modal-recipe-steps"></span></p>
+                    <p><strong>Macronutriments:</strong> <span id="modal-recipe-nutrition"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="scripts/script.js"></script>
+</body>
+</html>
+
