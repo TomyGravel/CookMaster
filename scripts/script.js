@@ -1,117 +1,73 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const recipeForm = document.getElementById('recipe-form');
-    const recipeList = document.getElementById('recipe-list');
-    const recipeModal = new bootstrap.Modal(document.getElementById('recipeModal'));
-    const modalRecipeName = document.getElementById('modal-recipe-name');
-    const modalRecipeIngredients = document.getElementById('modal-recipe-ingredients');
-    const modalRecipeSteps = document.getElementById('modal-recipe-steps');
-    const modalRecipeNutrition = document.getElementById('modal-recipe-nutrition');
+  const recipeForm = document.getElementById('recipe-form');
+  const recipeList = document.getElementById('recipe-list');
 
-    recipeForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const name = document.getElementById('recipe-name').value;
-        const ingredients = document.getElementById('recipe-ingredients').value;
-        const steps = document.getElementById('recipe-steps').value;
-        const nutritionInput = document.getElementById('recipe-nutrition').value;
-        const nutrition = nutritionInput.split(',').map(n => parseFloat(n.trim()));
+  recipeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('recipe-name').value;
+      const ingredients = document.getElementById('recipe-ingredients').value;
+      const steps = document.getElementById('recipe-steps').value;
+      const nutritionInput = document.getElementById('recipe-nutrition').value;
+      const nutrition = nutritionInput.split(',').map(n => parseFloat(n.trim()));
 
-        const recipe = {
-            name,
-            ingredients,
-            steps,
-            nutrition
-        };
+      const recipe = {
+          name,
+          ingredients,
+          steps,
+          nutrition
+      };
 
-        addRecipeToList(recipe);
-        saveRecipe(recipe);
-        recipeForm.reset();
-    });
+      addRecipeToList(recipe);
+      await saveRecipe(recipe);
+      recipeForm.reset();
+  });
 
-    function addRecipeToList(recipe) {
-        const recipeItem = document.createElement('div');
-        recipeItem.classList.add('card', 'mb-3');
-        recipeItem.innerHTML = `
-            <div class="card-body">
-                <h3 class="card-title">${recipe.name}</h3>
-                <p class="card-text"><strong>Ingrédients:</strong> ${recipe.ingredients}</p>
-                <button class="btn btn-primary" data-toggle="modal" data-target="#recipeModal" onclick='showRecipeDetails(${JSON.stringify(recipe)})'>Voir Détails</button>
-            </div>
-        `;
-        recipeList.appendChild(recipeItem);
-    }
+  function addRecipeToList(recipe) {
+      const recipeItem = document.createElement('div');
+      recipeItem.classList.add('card', 'mb-3');
+      recipeItem.innerHTML = `
+          <div class="card-body">
+              <h3 class="card-title">${recipe.name}</h3>
+              <p class="card-text"><strong>Ingrédients:</strong> ${recipe.ingredients}</p>
+              <button class="btn btn-primary" data-toggle="modal" data-target="#recipeModal" onclick='showRecipeDetails(${JSON.stringify(recipe)})'>Voir Détails</button>
+          </div>
+      `;
+      recipeList.appendChild(recipeItem);
+  }
 
-    function saveRecipe(recipe) {
-        let recipes = localStorage.getItem('recipes');
-        if (recipes) {
-            recipes = JSON.parse(recipes);
-        } else {
-            recipes = [];
-        }
-        // Vérifier si la recette existe déjà avant de l'ajouter
-        const recipeExists = recipes.some(r => r.name === recipe.name);
-        if (!recipeExists) {
-            recipes.push(recipe);
-            localStorage.setItem('recipes', JSON.stringify(recipes));
-        }
-    }
+  async function saveRecipe(recipe) {
+      const response = await fetch('http://localhost:3000/recipes', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(recipe)
+      });
+      return await response.json();
+  }
 
-    function loadRecipes() {
-        let recipes = localStorage.getItem('recipes');
-        if (recipes) {
-            recipes = JSON.parse(recipes);
-            // Filtrer les recettes en double par nom
-            const uniqueRecipes = [];
-            const recipeNames = new Set();
-            recipes.forEach(recipe => {
-                if (!recipeNames.has(recipe.name)) {
-                    uniqueRecipes.push(recipe);
-                    recipeNames.add(recipe.name);
-                }
-            });
-            // Mettre à jour le localStorage avec des recettes uniques
-            localStorage.setItem('recipes', JSON.stringify(uniqueRecipes));
-            uniqueRecipes.forEach(addRecipeToList);
-        }
-    }
+  async function loadRecipes() {
+      const response = await fetch('http://localhost:3000/recipes');
+      const recipes = await response.json();
+      recipes.forEach(addRecipeToList);
+  }
 
-    window.showRecipeDetails = function(recipe) {
-        modalRecipeName.innerText = recipe.name;
-        modalRecipeIngredients.innerText = recipe.ingredients;
-        modalRecipeSteps.innerText = recipe.steps;
-        const nutrition = calculateNutrition(recipe.nutrition);
-        modalRecipeNutrition.innerText = `Protéines: ${nutrition.protein}g, Glucides: ${nutrition.carbs}g, Lipides: ${nutrition.fat}g`;
-        recipeModal.show();
-    }
+  window.showRecipeDetails = function(recipe) {
+      modalRecipeName.innerText = recipe.name;
+      modalRecipeIngredients.innerText = recipe.ingredients;
+      modalRecipeSteps.innerText = recipe.steps;
+      const nutrition = calculateNutrition(recipe.nutrition);
+      modalRecipeNutrition.innerText = `Protéines: ${nutrition.protein}g, Glucides: ${nutrition.carbs}g, Lipides: ${nutrition.fat}g`;
+      recipeModal.show();
+  }
 
-    function calculateNutrition(nutrition) {
-        const protein = nutrition.reduce((sum, value) => sum + value, 0);
-        const carbs = nutrition.reduce((sum, value) => sum + value, 0);
-        const fat = nutrition.reduce((sum, value) => sum + value, 0);
-        return { protein, carbs, fat };
-    }
+  function calculateNutrition(nutrition) {
+      const protein = nutrition.reduce((sum, value) => sum + value, 0);
+      const carbs = nutrition.reduce((sum, value) => sum + value, 0);
+      const fat = nutrition.reduce((sum, value) => sum + value, 0);
+      return { protein, carbs, fat };
+  }
 
-    loadRecipes();
-
-    // Ajouter la recette de porridge par défaut si elle n'existe pas déjà
-    const porridgeRecipe = {
-        name: 'Porridge',
-        ingredients: 'Flocons d\'avoine, lait d\'amande, beurre de cacahuète, graines de chia, amandes, noix, sirop d\'agave, fruits rouges, banane, yaourt soja vanille',
-        steps: '1. Mélanger les flocons d\'avoine et le lait d\'amande.\n2. Chauffer à feu moyen jusqu\'à ce que le mélange épaississe.\n3. Ajouter le beurre de cacahuète et les graines de chia.\n4. Garnir avec les amandes, les noix, le sirop d\'agave, les fruits rouges, la banane et le yaourt soja vanille.',
-        nutrition: [5, 25, 10]
-    };
-
-    let recipes = localStorage.getItem('recipes');
-    if (recipes) {
-        recipes = JSON.parse(recipes);
-        const porridgeExists = recipes.some(recipe => recipe.name === 'Porridge');
-        if (!porridgeExists) {
-            addRecipeToList(porridgeRecipe);
-            saveRecipe(porridgeRecipe);
-        }
-    } else {
-        addRecipeToList(porridgeRecipe);
-        saveRecipe(porridgeRecipe);
-    }
+  loadRecipes();
 });
-
