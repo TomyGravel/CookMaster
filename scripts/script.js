@@ -48,15 +48,30 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             recipes = [];
         }
-        recipes.push(recipe);
-        localStorage.setItem('recipes', JSON.stringify(recipes));
+        // Vérifier si la recette existe déjà avant de l'ajouter
+        const recipeExists = recipes.some(r => r.name === recipe.name);
+        if (!recipeExists) {
+            recipes.push(recipe);
+            localStorage.setItem('recipes', JSON.stringify(recipes));
+        }
     }
 
     function loadRecipes() {
         let recipes = localStorage.getItem('recipes');
         if (recipes) {
             recipes = JSON.parse(recipes);
-            recipes.forEach(addRecipeToList);
+            // Filtrer les recettes en double par nom
+            const uniqueRecipes = [];
+            const recipeNames = new Set();
+            recipes.forEach(recipe => {
+                if (!recipeNames.has(recipe.name)) {
+                    uniqueRecipes.push(recipe);
+                    recipeNames.add(recipe.name);
+                }
+            });
+            // Mettre à jour le localStorage avec des recettes uniques
+            localStorage.setItem('recipes', JSON.stringify(uniqueRecipes));
+            uniqueRecipes.forEach(addRecipeToList);
         }
     }
 
@@ -70,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculateNutrition(nutrition) {
-        // Simple sum for demonstration, could be expanded with actual proportion calculation
         const protein = nutrition.reduce((sum, value) => sum + value, 0);
         const carbs = nutrition.reduce((sum, value) => sum + value, 0);
         const fat = nutrition.reduce((sum, value) => sum + value, 0);
@@ -79,13 +93,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadRecipes();
 
-    // Ajouter la recette de porridge par défaut
+    // Ajouter la recette de porridge par défaut si elle n'existe pas déjà
     const porridgeRecipe = {
         name: 'Porridge',
         ingredients: 'Flocons d\'avoine, lait d\'amande, beurre de cacahuète, graines de chia, amandes, noix, sirop d\'agave, fruits rouges, banane, yaourt soja vanille',
         steps: '1. Mélanger les flocons d\'avoine et le lait d\'amande.\n2. Chauffer à feu moyen jusqu\'à ce que le mélange épaississe.\n3. Ajouter le beurre de cacahuète et les graines de chia.\n4. Garnir avec les amandes, les noix, le sirop d\'agave, les fruits rouges, la banane et le yaourt soja vanille.',
-        nutrition: [5, 25, 10]  // Exemple de valeurs pour les macronutriments par 100g
+        nutrition: [5, 25, 10]
     };
-    addRecipeToList(porridgeRecipe);
-    saveRecipe(porridgeRecipe);
+
+    let recipes = localStorage.getItem('recipes');
+    if (recipes) {
+        recipes = JSON.parse(recipes);
+        const porridgeExists = recipes.some(recipe => recipe.name === 'Porridge');
+        if (!porridgeExists) {
+            addRecipeToList(porridgeRecipe);
+            saveRecipe(porridgeRecipe);
+        }
+    } else {
+        addRecipeToList(porridgeRecipe);
+        saveRecipe(porridgeRecipe);
+    }
 });
+
